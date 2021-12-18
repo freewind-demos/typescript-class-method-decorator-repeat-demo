@@ -1,21 +1,24 @@
-function logging() {
+function repeat(times: number) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    console.log(`enter: ${propertyKey}`)
-    console.log(target);
-    console.log(`exit: ${propertyKey}`)
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (...args: any[]) {
+      for (let i = 0; i < times; i += 1) {
+        await originalMethod.apply(this, args);
+      }
+    };
   }
 }
 
 class User {
-  constructor(public name: string) {
-  }
+  private count = 1;
 
-  @logging()
+  @repeat(3)
   hello() {
-    console.log(`Hello, ${this.name}!`);
+    console.log(`Count: ${this.count}`);
+    this.count += 1;
   }
 }
 
 
-const user = new User('typescript')
+const user = new User()
 user.hello()
